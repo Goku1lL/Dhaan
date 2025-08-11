@@ -1,4 +1,22 @@
-# 🚀 Dhan Advanced Algo Trading System
+# 🚀 Dhaan - Advanced Algorithmic Trading System
+
+A comprehensive algorithmic trading system with **Integrated Strategy Paper Trading**, real-time market scanning, and automated strategy execution for Indian stock markets.
+
+## ✨ **NEW: Integrated Strategy Paper Trading System**
+
+🎯 **Test actual trading strategies with paper money before going live!**
+
+- **Automated Strategy Execution**: Market scanner opportunities → Strategy decisions → Paper trades
+- **8 Built-in Trading Strategies**: RSI, Momentum, Bollinger, Grid Trading, etc.  
+- **Real-time Performance Analytics**: Win rates, P&L, drawdown analysis per strategy
+- **Strategy Testing Dashboard**: Compare strategies side-by-side with comprehensive metrics
+- **Risk Management**: Position sizing, confidence filtering, trade validation
+
+📊 **See [STRATEGY_TESTING_SYSTEM.md](STRATEGY_TESTING_SYSTEM.md) for complete documentation**
+
+---
+
+## 🏗️ Original System Overview
 
 A comprehensive algorithmic trading system with a modern React frontend and Python backend, designed for the Indian stock market.
 
