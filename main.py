@@ -15,16 +15,27 @@ os.environ.setdefault('DHAN_ACCESS_TOKEN', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9
 
 # Import and run the Flask app
 if __name__ == '__main__':
-    from backend.app import app
-    
-    # Get port from environment (Railway sets this automatically)
-    port = int(os.environ.get('PORT', 8000))
-    host = '0.0.0.0'
-    
-    print(f"🚀 Starting Dhaan Trading System on {host}:{port}")
-    
-    app.run(
-        host=host,
-        port=port,
-        debug=False  # Set to False for production
-    ) 
+    try:
+        from backend.app import app
+        
+        # Get port from environment (Railway sets this automatically)
+        port = int(os.environ.get('PORT', 8000))
+        host = '0.0.0.0'
+        
+        print(f"🚀 Starting Dhaan Trading System on {host}:{port}")
+        print(f"📊 Environment: {os.environ.get('FLASK_ENV', 'development')}")
+        
+        # Enable CORS for production
+        from flask_cors import CORS
+        CORS(app, origins=["https://dhaan-nu.vercel.app", "http://localhost:3000"])
+        
+        app.run(
+            host=host,
+            port=port,
+            debug=False,  # Set to False for production
+            threaded=True  # Enable threading for better performance
+        )
+    except Exception as e:
+        print(f"❌ Failed to start application: {e}")
+        import traceback
+        traceback.print_exc() 

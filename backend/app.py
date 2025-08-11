@@ -49,6 +49,18 @@ else:
     strategy_integration = None
     print("❌ Strategy Paper Trading Integration not available")
 
+@app.route('/', methods=['GET'])
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Simple health check endpoint for Railway."""
+    from datetime import datetime
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Dhaan Trading System',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard():
     """Get dashboard data including portfolio summary and active positions."""
