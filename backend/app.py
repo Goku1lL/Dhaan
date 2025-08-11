@@ -668,13 +668,23 @@ def reset_paper_portfolio():
 
 
 if __name__ == '__main__':
+    import os
+    
     # Set environment variables if not already set
     if not os.getenv('DHAN_CLIENT_ID'):
         os.environ['DHAN_CLIENT_ID'] = '1107931059'
     if not os.getenv('DHAN_ACCESS_TOKEN'):
-        os.environ['DHAN_ACCESS_TOKEN'] = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJkaGFuIiwicGFydG5lcklkIjoiIiwiZXhwIjoxNzU2ODMzMDc4LCJ0b2tlbkNvbnN1bWVyVHlwZSI6IlNFTEYiLCJ3ZWJob29rVXJsIjoiIiwiZGhhbkNsaWVudElkIjoiMTEwNzkzMTA1OSJ9.nmlNncCNvmF3hg43EF38SXmm99oKz8GF9dqpP1gVAWdNkinSewYWQAlF4lpPo6i02tqMr_irAFA0z52a6u346w'
+        os.environ['DHAN_ACCESS_TOKEN'] = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJkaGFuIiwicGFydG5lcklkIjoiIiwiZXhwIjoxNzU2ODMzMDc4LCJ0b2tlbkNvbnN1bWVyVHlwZSI6IlNFTEYiLCJ3ZWJob29rVXJsIjoiIiwiZGhhbkNsaWVudElkIjoiMTEwNzkzMTA1OSJ9.nmlNncCNvmF3hg43EF38SqP1gVAWdNkinSewYWQAlF4lpPo6i02tqMr_irAFA0z52a6u346w'
+    
+    port = int(os.environ.get('PORT', 8000))
+    host = '0.0.0.0'  # Allow external connections in production
     
     logger.info("Starting Dhan Advanced Algo Trading Backend...")
     logger.info(f"Market Scanner Manager initialized: {market_scanner_manager.get_scanner_status()}")
+    print(f"🚀 Starting server on {host}:{port}")
     
-    app.run(debug=True, host='0.0.0.0', port=8000) 
+    app.run(
+        host=host,
+        port=port,
+        debug=True
+    ) 
