@@ -2,11 +2,10 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "cd backend && python app.py"
+startCommand = "python main.py"
 healthcheckPath = "/api/dashboard"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 
 [environments.production.variables]
-PORT = "8000"
 FLASK_ENV = "production" 
