@@ -1,0 +1,25 @@
+# Core dependencies for Dhan Advanced Algo Trading System
+
+# Dhan Trading API
+dhanhq>=1.0.0
+
+# Data manipulation and analysis
+pandas>=1.5.0
+numpy>=1.21.0
+
+# Technical Analysis
+TA-Lib>=0.4.0
+
+# Excel integration
+xlwings>=0.30.0
+
+# Telegram integration
+telepot>=12.7
+
+# Optional: Audio alerts (Windows only)
+# winsound is part of Python standard library on Windows
+
+# Development and testing (optional)
+pytest>=7.0.0
+black>=22.0.0
+flake8>=5.0.0 

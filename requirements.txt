@@ -1,0 +1,15 @@
+# Dhan Advanced Algo Trading System Dependencies
+# Core data processing
+pandas>=2.3.0
+numpy>=2.3.0
+
+# HTTP requests and API communication
+requests>=2.32.0
+
+# Telegram bot functionality
+telepot>=12.7
+
+# Additional dependencies that may be needed
+# python-telegram-bot>=20.0  # Alternative to telepot if needed
+# websockets>=11.0  # For real-time data streaming
+# asyncio-mqtt>=0.16.0  # For MQTT messaging if needed 
