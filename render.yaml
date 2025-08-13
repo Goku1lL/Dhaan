@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: dhaan-backend
+    env: python
+    plan: free
+    buildCommand: |
+      python -m pip install --upgrade pip setuptools wheel
+      pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: FLASK_ENV
+        value: production 
