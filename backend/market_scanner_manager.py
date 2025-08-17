@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 import logging
 
-from dhan_service import DhanService
+from .dhan_service import DhanService
 
 # Import the scanning components (we'll handle import errors gracefully)
 try:

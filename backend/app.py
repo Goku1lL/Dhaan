@@ -1,13 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from dhan_service import DhanService
-from market_scanner_manager import MarketScannerManager
+from .dhan_service import DhanService
+from .market_scanner_manager import MarketScannerManager
 import os
 import logging
 
 # Paper Trading Manager
 try:
-    from paper_trading_manager import paper_trading_manager
+    from .paper_trading_manager import paper_trading_manager
     PAPER_TRADING_AVAILABLE = True
     print("✅ Paper Trading Manager loaded successfully")
 except ImportError as e:
@@ -16,7 +16,7 @@ except ImportError as e:
 
 # Strategy Paper Trading Integration
 try:
-    from strategy_paper_trading_integration import initialize_strategy_paper_trading_integration, get_strategy_paper_trading_integration
+    from .strategy_paper_trading_integration import initialize_strategy_paper_trading_integration, get_strategy_paper_trading_integration
     STRATEGY_PAPER_TRADING_AVAILABLE = True
     print("✅ Strategy Paper Trading Integration loaded successfully")
 except ImportError as e:
@@ -44,6 +44,13 @@ if STRATEGY_PAPER_TRADING_AVAILABLE and PAPER_TRADING_AVAILABLE:
     strategy_integration = initialize_strategy_paper_trading_integration(
         market_scanner_manager, paper_trading_manager
     )
+    # Start strategy processing loop to auto-process opportunities periodically
+    try:
+        # Run every 30 seconds by default
+        strategy_integration.run_strategy_processing_loop(interval_seconds=30)
+        logger.info("Strategy processing background loop started")
+    except Exception as _bg_err:
+        logger.error(f"Failed to start strategy processing loop: {_bg_err}")
     print("✅ Strategy Paper Trading Integration initialized")
 else:
     strategy_integration = None

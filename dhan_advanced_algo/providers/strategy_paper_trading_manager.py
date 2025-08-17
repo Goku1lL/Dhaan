@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from decimal import Decimal
 from dataclasses import dataclass
+from uuid import uuid4
 
 from ..core.logging_service import LoggingService
 from ..core.entities import Order, OrderSide, OrderType
@@ -162,7 +163,7 @@ class StrategyPaperTradingManager:
         
         Args:
             opportunity: Trading opportunity from market scanner
-            
+        
         Returns:
             True if trade was executed, False otherwise
         """
@@ -275,51 +276,44 @@ class StrategyPaperTradingManager:
             # Determine order side
             order_side = OrderSide.BUY if opportunity.signal_type == "BUY" else OrderSide.SELL
             
-            # Create order
-            order_data = {
-                "symbol": opportunity.symbol,
-                "quantity": quantity,
-                "price": opportunity.entry_price,
-                "side": order_side.value,
-                "order_type": "MARKET",
-                "strategy_id": opportunity.strategy_id,
-                "stop_loss": opportunity.stop_loss,
-                "target": opportunity.target_price
-            }
-            
-            # Place paper order
-            order_result = self.paper_broker.place_order(
+            # Build Order expected by the broker
+            order = Order(
+                order_id=str(uuid4()),
                 symbol=opportunity.symbol,
+                side=order_side,
+                order_type=OrderType.MARKET,
                 quantity=quantity,
                 price=Decimal(str(opportunity.entry_price)),
-                side=order_side,
-                order_type=OrderType.MARKET
+                stop_loss=Decimal(str(opportunity.stop_loss)) if opportunity.stop_loss else None,
+                target=Decimal(str(opportunity.target_price)) if opportunity.target_price else None
             )
             
-            if order_result and order_result.get("success"):
-                # Create strategy trade record
-                trade = StrategyTrade(
-                    trade_id=order_result["order_id"],
-                    strategy_id=opportunity.strategy_id,
-                    symbol=opportunity.symbol,
-                    order_side=order_side,
-                    entry_price=Decimal(str(opportunity.entry_price)),
-                    quantity=quantity,
-                    entry_time=datetime.now()
-                )
-                
-                # Add to tracking
-                self.strategy_trades.append(trade)
-                self.active_trades[trade.trade_id] = trade
-                
-                # Update strategy performance
-                performance = self.strategy_performances[opportunity.strategy_id]
-                performance.total_trades += 1
-                performance.active_positions += 1
-                
-                return True
+            # Place order
+            virtual_order_id = self.paper_broker.place_order(order)
+            if not virtual_order_id:
+                return False
             
-            return False
+            # Create strategy trade record
+            trade = StrategyTrade(
+                trade_id=virtual_order_id,
+                strategy_id=opportunity.strategy_id,
+                symbol=opportunity.symbol,
+                order_side=order_side,
+                entry_price=Decimal(str(opportunity.entry_price)),
+                quantity=quantity,
+                entry_time=datetime.now()
+            )
+            
+            # Track trade
+            self.strategy_trades.append(trade)
+            self.active_trades[trade.trade_id] = trade
+            
+            # Update strategy performance counters
+            performance = self.strategy_performances[opportunity.strategy_id]
+            performance.total_trades += 1
+            performance.active_positions += 1
+            
+            return True
             
         except Exception as e:
             self.logger.log_error(e, {"operation": "execute_paper_trade"})

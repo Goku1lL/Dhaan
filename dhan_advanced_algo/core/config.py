@@ -54,7 +54,7 @@ class BrokerConfig:
     api_base_url: str = ""
     request_timeout: int = 30
     max_retries: int = 3
-    rate_limit_delay: float = 0.1
+    rate_limit_delay: float = 1.0  # Increased from 0.1 to 1 second to respect Dhan's rate limits
 
 
 @dataclass
@@ -94,8 +94,8 @@ class MarketScannerConfig:
     """Market scanner configuration parameters."""
     scan_interval_seconds: int = 300  # 5 minutes
     min_confidence_score: float = 0.7  # Minimum confidence for opportunities
-    max_concurrent_stocks: int = 10  # Maximum stocks to scan concurrently
-    batch_size: int = 5  # Number of stocks per batch
+    max_concurrent_stocks: int = 3  # Reduced from 10 to 3 to avoid overwhelming Dhan's API
+    batch_size: int = 2  # Reduced from 5 to 2 for smaller batches
     timeout_seconds: int = 30  # Timeout for individual stock analysis
     stock_universe: Optional[List[str]] = None  # Custom stock universe (if None, uses default)
 

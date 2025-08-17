@@ -9,6 +9,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import logging
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -566,12 +567,85 @@ class DhanService:
             logger.error(f"Error closing position: {e}")
             return {"error": "Failed to close position"}
     
+    def _fetch_scrip_master(self):
+        """
+        Fetch Dhan's scrip master to map trading symbols to security IDs.
+        """
+        try:
+            # Check if cache is still valid (cache for 24 hours)
+            current_time = time.time()
+            if hasattr(self, '_scrip_master_cache') and hasattr(self, '_scrip_master_cache_time'):
+                if (self._scrip_master_cache and 
+                    current_time - self._scrip_master_cache_time < 24 * 3600):
+                    return self._scrip_master_cache
+               
+            # Fetch fresh scrip master
+            url = "https://images.dhan.co/api-data/api-scrip-master.csv"
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            # Parse CSV and build mapping
+            lines = response.text.strip().split('\n')
+            symbol_to_security_id = {}
+            
+            logger.info(f"Parsing {len(lines)} lines from scrip master")
+            
+            # Look for NSE equity symbols throughout the entire CSV
+            nse_count = 0
+            major_stocks = ["RELIANCE", "TCS", "HDFC", "INFY", "ICICIBANK", "HINDUNILVR", "ITC", "SBIN", 
+                           "BHARTIARTL", "AXISBANK", "ASIANPAINT", "MARUTI", "HCLTECH", "ULTRACEMCO"]
+            
+            # First pass: look for major stocks specifically
+            for i, line in enumerate(lines[1:]):  # Skip header
+                parts = line.split(',')
+                if len(parts) >= 6:
+                    exchange = parts[0].strip()
+                    segment = parts[1].strip()
+                    security_id = parts[2].strip()
+                    instrument_name = parts[3].strip()
+                    trading_symbol = parts[5].strip()
+                    
+                    # Only include NSE equity symbols
+                    if exchange == "NSE" and instrument_name == "EQUITY":
+                        symbol_to_security_id[trading_symbol] = security_id
+                        nse_count += 1
+                        
+                        # Log major stock mappings
+                        if trading_symbol in major_stocks:
+                            logger.info(f"Found major stock: {trading_symbol} -> {security_id}")
+                        
+                        # Log first few NSE entries for debugging
+                        if nse_count <= 10:
+                            logger.info(f"Added NSE mapping: {trading_symbol} -> {security_id}")
+            
+            logger.info(f"Scrip master updated with {len(symbol_to_security_id)} NSE equity symbols")
+            logger.info(f"Major stocks found: {[s for s in major_stocks if s in symbol_to_security_id]}")
+            
+            # Update cache
+            self._scrip_master_cache = symbol_to_security_id
+            self._scrip_master_cache_time = current_time
+            
+            logger.info(f"Scrip master updated with {len(symbol_to_security_id)} NSE equity symbols")
+            return symbol_to_security_id
+            
+        except Exception as e:
+            logger.error(f"Failed to fetch scrip master: {e}")
+            # Return empty dict if fetch fails
+            return {}
+    
+    def _get_security_id(self, symbol: str):
+        """
+        Get security ID for a trading symbol.
+        """
+        scrip_master = self._fetch_scrip_master()
+        return scrip_master.get(symbol)
+
     def get_market_data(self, symbol: str) -> Dict:
         """Get market data for a specific symbol from Dhan API."""
         try:
             # Use the charts/intraday endpoint for market data
             chart_request = {
-                "securityId": symbol,
+                "securityId": self._get_security_id(symbol),  # Try without prefix - Dhan API seems to reject NSE_EQ: prefix
                 "exchangeSegment": "NSE_EQ",  # Default to NSE Equity
                 "instrument": "EQUITY"  # Default to equity
             }
